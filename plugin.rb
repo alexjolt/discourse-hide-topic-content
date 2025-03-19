@@ -19,13 +19,9 @@ after_initialize do
       object.posts.map { |p| p }
     else
       object.posts.map do |p|
-        OpenStruct.new(
-          id: p.id,
-          user_id: p.user_id,
-          cooked: "<div class='login-required'><p>You must be logged in to view this content.</p><a href='/login' class='btn btn-primary'>Log in</a></div>",
-          created_at: p.created_at,
-          updated_at: p.updated_at
-        )
+        p.dup.tap do |post|
+          post.cooked = "<div class='login-required'><p>You must be logged in to view this content.</p><a href='/login' class='btn btn-primary'>Log in</a></div>"
+        end
       end
     end
   end
