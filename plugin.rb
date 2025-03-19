@@ -16,10 +16,16 @@ after_initialize do
 
   # Modify the TopicViewSerializer
   add_to_serializer(:topic_view, :posts, false) do
-    if scope.user.present?
-      object.posts.map { |p| p }
-    else
-      [{ cooked: "<div class='login-required'><p>You must be logged in to view this content.</p><a href='/login' class='btn btn-primary'>Log in</a></div>" }]
-    end
+  if scope.user.present?
+    object.posts.map { |p| p }
+  else
+    # Create a valid placeholder post
+    [{
+      id: -1,
+      cooked: "<div class='login-required'><p>You must be logged in to view this content.</p><a href='/login' class='btn btn-primary'>Log in</a></div>",
+      user_id: nil,
+      created_at: Time.now,
+      updated_at: Time.now
+    }]
   end
 end
