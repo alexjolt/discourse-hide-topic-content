@@ -15,13 +15,18 @@ after_initialize do
   end
 
   add_to_serializer(:topic_view, :posts, respect_plugin_enabled: false) do
-    if scope.user.present?
-      object.posts.map { |p| p }
+    if scope.user
+      object.posts
     else
-      object.posts.map do |p|
-        p.dup.tap do |post|
-          post.cooked = "<div class='login-required'><p>You must be logged in to view this content.</p><a href='/login' class='btn btn-primary'>Log in</a></div>"
-        end
+      object.posts.map do |post|
+        new_post = post.dup
+        new_post.cooked = <<~HTML
+          <div class='login-required'>
+            <p>You must be logged in to view this content.</p>
+            <a href='/login' class='btn btn-primary'>Log in</a>
+          </div>
+        HTML
+        new_post
       end
     end
   end
