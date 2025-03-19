@@ -5,7 +5,7 @@
 # url: https://github.com/alexjolt/discourse-hide-topic-content
 
 after_initialize do
-  require_dependency 'topic_view'
+  require_dependency 'post_serializer'
 
   module ::HideTopicContent
     class Engine < ::Rails::Engine
@@ -14,20 +14,24 @@ after_initialize do
     end
   end
 
-  add_to_serializer(:topic_view, :posts, respect_plugin_enabled: false) do
-    if scope.user
-      object.posts
-    else
-      object.posts.map do |post|
-        new_post = post.dup
-        new_post.cooked = <<~HTML
+  # Extend PostSerializer using a module to avoid conflicts
+  module ::HideTopicContent::PostSerializerExtension
+    def cooked
+      if scope.user.present?
+        object.cooked
+      else
+        <<~HTML
           <div class='login-required'>
             <p>You must be logged in to view this content.</p>
             <a href='/login' class='btn btn-primary'>Log in</a>
           </div>
         HTML
-        new_post
       end
     end
+  end
+
+  # Safely extend the PostSerializer
+  class ::PostSerializer
+    prepend ::HideTopicContent::PostSerializerExtension
   end
 end
