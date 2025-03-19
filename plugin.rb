@@ -14,7 +14,7 @@ after_initialize do
     end
   end
 
-  add_to_serializer(:topic_view, :posts, false) do
+  add_to_serializer(:topic_view, :posts, respect_plugin_enabled: false) do
     if scope.user.present?
       object.posts.map { |p| p }
     else
